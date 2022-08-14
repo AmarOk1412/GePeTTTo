@@ -25,7 +25,7 @@ class GePeTTTo(cmd.Cmd):
         # TODO davinci:ft-personal-2022-08-08-02-28-29
         self.answer = openai.Completion.create(\
             model="text-davinci-002",\
-            prompt=f"{json.dumps(issue['body'])}",\
+            prompt=f"Answer to this issue:\n\n{json.dumps(issue['body'])}",\
             temperature=0, max_tokens=500\
         )['choices'][0]['text']
 
