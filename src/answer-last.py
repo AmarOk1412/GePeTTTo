@@ -4,6 +4,7 @@ import cmd
 import json
 import openai
 import os
+import re
 
 from termcolor import colored, cprint
 from gitparser import GitParser
@@ -13,7 +14,8 @@ class GePeTTTo(cmd.Cmd):
     prompt = colored('(GePeTTTo) ', 'yellow')
     file = None
     intro = colored('Type help or ? to list commands.\n', 'green')
-    parser = GitParser(os.getenv('GITLAB_ENDPOINT'))
+    endpoint = os.getenv('GITLAB_ENDPOINT')
+    parser = GitParser(endpoint)
     issues = []
     answeringTo = None
     answer = ''
@@ -28,19 +30,42 @@ class GePeTTTo(cmd.Cmd):
         )['choices'][0]['text']
 
     def do_help(self, args=''):
-        print('start: Start to analyze issues') # DONE
-        print('save <file>: save generated answer to <file>')
-        print('send: send answer without saving it')
-        print('send <file>: send answer from file')
-        print('next: pass to the next issue') # DONE
-        print('exit: close GePeTTTo') # DONE
+        print('start: Start to analyze issues')
+        print('save <file>: Save generated answer to <file>')
+        print('send: Send answer without saving it')
+        print('send <file>: Send answer from file')
+        print('add <url>: Add an issue from an url')
+        print('next: Pass to the next issue')
+        print('exit: Close GePeTTTo')
 
     def do_clear(self, arg):
         '''Clear your prompt: CLEAR'''
         os.system('clear')
     
+    def do_add(self, arg):
+        '''Start the analysis'''
+        match = re.match(f'{self.endpoint}/(\w+)/(.+)/-/issues/([0-9]+)', arg)
+        if match:
+            project_id = 0
+            for pj in self.parser.get_projects():
+                if pj['name'] == match[2]:
+                    project_id = pj['id']
+                    break
+            if project_id == 0:
+                print('No project found')
+                return
+            self.issues.append(self.parser.get_issue(project_id, match[3]))
+            print('Generating answer...')
+            self.do_next('')
+            return
+        print('Incorrect url')
+    
+    def do_EOF(self, arg):
+        return True
+    
     def do_start(self, arg):
         '''Start the analysis'''
+        print('Retrieving issues... (can be slow)')
         self.issues = self.parser.get_last_issues()
         self.do_next(arg)
     
@@ -50,8 +75,8 @@ class GePeTTTo(cmd.Cmd):
             # Save last answered issue
             self.parser.set_last_issue(self.answeringTo['id'])
         if len(self.issues) == 0:
-            print('No issue to analyze')
-            self.do_exit(arg)
+            print('No issue to analyze (you can add one or exit)')
+            return
         self.answeringTo = self.issues[0]
         self.answerTo(self.answeringTo)
         self.print_issue(self.answeringTo, self.answer)

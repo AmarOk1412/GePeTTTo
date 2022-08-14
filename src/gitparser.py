@@ -8,7 +8,6 @@ class GitParser:
     """GitParser uses GitLab's API to parse issues"""
     def __init__(self, url, users_wanted = [], ignore_in = [], ignore_start = []):
         self.git_url = url
-        self.projects = []
         self.users_wanted = users_wanted
         self.headers = {'PRIVATE-TOKEN': os.getenv('GITLAB_API_KEY')}
         self.ignore_in = ['/uploads/', '```'] if len(ignore_in) == 0 else ignore_in
@@ -19,14 +18,27 @@ class GitParser:
 
     def get_projects(self):
         """Retrieve all projects from a gitlab instance"""
+        projects = []
         endpoint = f'{self.git_url}/api/v4/projects'
         resp = requests.get(endpoint)
         data = resp.json()
         for obj in data:
-            self.projects.append({
+            projects.append({
                 'id': obj['id'],
                 'name': obj['name'],
             })
+        return projects
+
+    def get_issue(self, project_id, issue_id):
+        """Create an issue object"""
+        endpoint = f'{self.git_url}/api/v4/projects/{project_id}/issues/{issue_id}'
+        resp = requests.get(endpoint, headers=self.headers)
+        obj = resp.json()
+        return {'id': issue_id, \
+                'project': project_id, \
+                'author': obj['author']['username'], \
+                'body': f'{obj["title"]}\n\n{obj["description"]}'}
+
 
     def get_issues_for_training(self, project_id, training_file):
         """Write in training_file comment from wanted users for customizing a GPT-3 model.
@@ -72,7 +84,6 @@ class GitParser:
             except Exception as e:
                 print(f'Failed to get discussion: {e}')
                 return
-
     
     def get_last_issues(self):
         """Retrieve last issue's ids, author, and body (read/write a file named lastIssue)"""
