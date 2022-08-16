@@ -18,12 +18,13 @@ class GePeTTTo(cmd.Cmd):
     issues = []
     answeringTo = None
     answer = ''
+    model = os.getenv('OPENAI_MODEL')
 
     def answerTo(self, issue):
         '''Answer to an issue via GPT-3 model'''
         # TODO davinci:ft-personal-2022-08-08-02-28-29
         self.answer = openai.Completion.create(\
-            model="text-davinci-002",\
+            model=self.model,\
             prompt=f"Answer to this issue:\n\n{json.dumps(issue['body'])}",\
             temperature=0, max_tokens=500\
         )['choices'][0]['text']
@@ -34,6 +35,7 @@ class GePeTTTo(cmd.Cmd):
         print('send: Send answer without saving it')
         print('send <file>: Send answer from file')
         print('add <url>: Add an issue from an url')
+        print('add <file>: Add an issue from a file (no send possible)')
         print('next: Pass to the next issue')
         print('exit: Close GePeTTTo')
 
@@ -43,21 +45,33 @@ class GePeTTTo(cmd.Cmd):
     
     def do_add(self, arg):
         '''Start the analysis'''
-        match = re.match(f'{self.endpoint}/(\w+)/(.+)/-/issues/([0-9]+)', arg)
-        if match:
-            project_id = 0
-            for pj in self.parser.get_projects():
-                if pj['name'] == match[2]:
-                    project_id = pj['id']
-                    break
-            if project_id == 0:
-                print('No project found')
+        if arg.startswith('http'):
+            match = re.match(f'{self.endpoint}/(\w+)/(.+)/-/issues/([0-9]+)', arg)
+            if match:
+                project_id = 0
+                for pj in self.parser.get_projects():
+                    if pj['name'] == match[2]:
+                        project_id = pj['id']
+                        break
+                if project_id == 0:
+                    print('No project found')
+                    return
+                self.issues.append(self.parser.get_issue(project_id, match[3]))
+                print('Generating answer...')
+                self.do_next('')
                 return
-            self.issues.append(self.parser.get_issue(project_id, match[3]))
-            print('Generating answer...')
-            self.do_next('')
-            return
-        print('Incorrect url')
+            print('Incorrect url')
+        else:
+            # Try to add the issue from a file
+            with open(arg, 'r') as f:
+                content = 'Answer to this issue:\n\n' + f.read()
+                self.issues.append({'id': 0, \
+                                    'project_id': 0, \
+                                    'author': 'NONE', \
+                                    'body': f'{content}'})
+                print('Generating answer...')
+                self.do_next('')
+
     
     def do_EOF(self, arg):
         return True
@@ -84,6 +98,9 @@ class GePeTTTo(cmd.Cmd):
     
     def do_send(self, arg):
         '''Send answer to GitLab'''
+        if self.answeringTo['id'] == 0:
+            print('Cannot send answer to GitLab (issue from a file). You can use the "save" command')
+            return
         try:
             if arg != '':
                 with open(arg, 'r') as f:

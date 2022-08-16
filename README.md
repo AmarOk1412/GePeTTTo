@@ -16,11 +16,12 @@ To get your GPT-3 token, connect to your OpenAI's account and generate a new tok
 
 Then, you simply need to create the environment file (default: `env`) like so:
 
-```bash
-export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
-export GITLAB_API_KEY="YOUR_GITLAB_API_KEY"
-export GITLAB_ENDPOINT="YOUR_GITLAB_INSTANCE"
-export GITLAB_USERS="COMMA_SEPARATED_USERS" # Optional, if you want to train a custom model, e.g. 9,3,233
+```
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+OPENAI_MODEL=YOUR_OPENAI_API_MODEL #text-davinci-002 if not customized
+GITLAB_API_KEY=YOUR_GITLAB_API_KEY
+GITLAB_ENDPOINT=YOUR_GITLAB_INSTANCE
+GITLAB_USERS=COMMA_SEPARATED_USERS # Optional, if you want to train a custom model, e.g. 9,3,233
 ```
 
 You also need to install `termcolor` (`pip3 install termcolor`), `bs4` (`pip3 install bs4`) and `markdown` (`pip3 install markdown`).

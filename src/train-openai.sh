@@ -9,13 +9,23 @@ print_usage() {
     echo "sh train-openai.sh -h # Show this message"
 }
 
-while true; do
-  case "$1" in
-    -h | --help ) print_usage; shift; exit 0 ;;
-    -d | --dataset ) dataset=$2; shift ;;
-    -m | --model ) model="$2"; shift ;;
-    * ) print_usage; shift; exit 1 ;;
-  esac
+while getopts ":h:d:m:" o; do
+    case "${o}" in
+        s)
+            dataset=${OPTARG}
+            ((s == 45 || s == 90)) || usage
+            ;;
+        p)
+            model=${OPTARG}
+            ;;
+        *)
+            ;;
+    esac
 done
+shift $((OPTIND-1))
+
+if [ -z "${model}" ] || [ -z "${dataset}" ]; then
+    usage
+fi
 
 openai api fine_tunes.create -m ${model} --n_epochs 2 -t ${dataset}
