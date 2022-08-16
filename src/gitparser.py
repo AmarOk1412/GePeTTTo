@@ -92,7 +92,6 @@ class GitParser:
                 if len(self.users_wanted) == 0 or author in self.users_wanted:
                     lastBody = "Answer to this issue:\\n\\n" + issue['discussion'][-1]['body']
                     lastBody = self.mdToText(lastBody)
-                    body = body + "###"
                     d = "{" + f'"prompt": {json.dumps(lastBody)}, "completion": {json.dumps(body)}' + "}\n"
                     print(d)
                     training_file.write(d)

@@ -44,6 +44,8 @@ make train
 
 will run `src/train-openai.sh` with default parameters.
 
+However, text-davinci-002 seems to be not customizable and get way better results than davinci (which can be customized). So for now, not sure if it's wanted.
+
 ### Use it
 
 ```
