@@ -23,7 +23,7 @@ export GITLAB_ENDPOINT="YOUR_GITLAB_INSTANCE"
 export GITLAB_USERS="COMMA_SEPARATED_USERS" # Optional, if you want to train a custom model, e.g. 9,3,233
 ```
 
-You also need to install `termcolor` (`pip3 install termcolor`)
+You also need to install `termcolor` (`pip3 install termcolor`), `bs4` (`pip3 install bs4`) and `markdown` (`pip3 install markdown`).
 
 ## Usage
 

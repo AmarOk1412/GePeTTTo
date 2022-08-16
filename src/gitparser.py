@@ -4,6 +4,10 @@ import json
 import os
 import requests
 
+from bs4 import BeautifulSoup
+from markdown import markdown
+
+
 class GitParser:
     """GitParser uses GitLab's API to parse issues"""
     def __init__(self, url, users_wanted = [], ignore_in = [], ignore_start = []):
@@ -15,6 +19,13 @@ class GitParser:
                              'changed the description', 'changed title from', \
                              'unassigned', 'closed', 'reopened', 'added ', 'removed ', \
                              'changed milestone to'] if len(ignore_start) == 0 else ignore_start
+
+    def mdToText(self, mdString):
+        """ Converts a markdown string to plaintext """
+        html = markdown(mdString)
+        text = ''.join(BeautifulSoup(html).findAll(text=True))
+        return text
+
 
     def get_projects(self):
         """Retrieve all projects from a gitlab instance"""
@@ -34,10 +45,12 @@ class GitParser:
         endpoint = f'{self.git_url}/api/v4/projects/{project_id}/issues/{issue_id}'
         resp = requests.get(endpoint, headers=self.headers)
         obj = resp.json()
+        content = obj["title"] + "\n\n" + obj["description"]
+        content = self.mdToText(content)
         return {'id': issue_id, \
                 'project': project_id, \
                 'author': obj['author']['username'], \
-                'body': f'{obj["title"]}\n\n{obj["description"]}'}
+                'body': f'{content}'}
 
 
     def get_issues_for_training(self, project_id, training_file):
@@ -50,8 +63,10 @@ class GitParser:
                 resp = requests.get(endpoint)
                 data = resp.json()
                 for obj in data:
+                    content = obj["title"] + "\n\n" + obj["description"]
+                    content = self.mdToText(content)
                     try:
-                        comment = {'author': obj['author']['id'], 'body': f'{obj["title"]}\n\n{obj["description"]}'}
+                        comment = {'author': obj['author']['id'], 'body': f'{content}'}
                         issue = {'id': obj['iid'], 'discussion': [comment]}
                         self.get_discussion(id, issue, training_file)
                     except Exception as e:
@@ -76,6 +91,7 @@ class GitParser:
                     continue
                 if len(self.users_wanted) == 0 or author in self.users_wanted:
                     lastBody = "Answer to this issue:\\n\\n" + issue['discussion'][-1]['body']
+                    lastBody = self.mdToText(lastBody)
                     body = body + "###"
                     d = "{" + f'"prompt": {json.dumps(lastBody)}, "completion": {json.dumps(body)}' + "}\n"
                     print(d)
@@ -107,10 +123,12 @@ class GitParser:
                     iid = obj['iid']
                     if lastIssue == str(iid):
                         return lastIssues
+                    content = obj["title"] + "\n\n" + obj["description"]
+                    content = self.mdToText(content)
                     lastIssues.append({'id': iid, \
                                        'project': obj['project_id'], \
                                        'author': obj['author']['username'], \
-                                       'body': f'{obj["title"]}\n\n{obj["description"]}'})
+                                       'body': f'{content}'})
                 p += 1
                 if len(data) != 50:
                     break

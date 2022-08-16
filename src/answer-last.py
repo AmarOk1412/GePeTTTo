@@ -6,14 +6,13 @@ import openai
 import os
 import re
 
-from termcolor import colored, cprint
 from gitparser import GitParser
-
+from termcolor import colored, cprint
 
 class GePeTTTo(cmd.Cmd):
     prompt = colored('(GePeTTTo) ', 'yellow')
     file = None
-    intro = colored('Type help or ? to list commands.\n', 'green')
+    intro = colored(f'Type help or ? to list commands.\n', 'green')
     endpoint = os.getenv('GITLAB_ENDPOINT')
     parser = GitParser(endpoint)
     issues = []
