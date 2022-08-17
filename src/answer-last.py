@@ -84,7 +84,7 @@ class GePeTTTo(cmd.Cmd):
     
     def do_next(self, arg):
         '''Show the next issue to analyze'''
-        if self.answeringTo != None:
+        if self.answeringTo != None and self.answeringTo['id'] != 0:
             # Save last answered issue
             self.parser.set_last_issue(self.answeringTo['id'])
         if len(self.issues) == 0:

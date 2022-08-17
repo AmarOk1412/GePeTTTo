@@ -134,7 +134,7 @@ class GitParser:
             except Exception as e:
                 print(f'Error while retrieving issues: {e}')
                 break
-        return lastIssues
+        return lastIssues.reverse()
     
     def set_last_issue(self, issue):
         with open('lastIssue', 'w') as lastIssueFile:
