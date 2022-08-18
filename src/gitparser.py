@@ -75,7 +75,7 @@ class GitParser:
                 p += 1
                 if len(data) != 50:
                     break
-            
+
     def get_discussion(self, project_id, issue, training_file):
         """cf get_issues_for_training"""
         endpoint = f'{self.git_url}/api/v4/projects/{project_id}/issues/{issue["id"]}/discussions?per_page=50'
@@ -92,14 +92,14 @@ class GitParser:
                 if len(self.users_wanted) == 0 or author in self.users_wanted:
                     lastBody = "Answer to this issue:\\n\\n" + issue['discussion'][-1]['body']
                     lastBody = self.mdToText(lastBody)
-                    d = "{" + f'"prompt": {json.dumps(lastBody)}, "completion": {json.dumps(body)}' + "}\n"
+                    d = "{" + f'"prompt": {json.dumps(lastBody)}, "completion": {json.dumps(body)}' + "<END>}\n"
                     print(d)
                     training_file.write(d)
                 issue['discussion'].append({ 'author': author, 'body': body})
             except Exception as e:
                 print(f'Failed to get discussion: {e}')
                 return
-    
+
     def get_last_issues(self):
         """Retrieve last issue's ids, author, and body (read/write a file named lastIssue)"""
         lastIssue = 0
@@ -135,12 +135,12 @@ class GitParser:
                 print(f'Error while retrieving issues: {e}')
                 break
         return lastIssues.reverse()
-    
+
     def set_last_issue(self, issue):
         with open('lastIssue', 'w') as lastIssueFile:
             print(f'Save last issue: {issue}')
             lastIssueFile.write(str(issue))
-    
+
     def answer(self, project_id, issue_id, body):
         """Answer to an issue on the specified issue"""
         endpoint = f'{self.git_url}/api/v4/projects/{project_id}/issues/{issue_id}/notes?body={body}'

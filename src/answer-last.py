@@ -22,11 +22,11 @@ class GePeTTTo(cmd.Cmd):
 
     def answerTo(self, issue):
         '''Answer to an issue via GPT-3 model'''
-        # TODO davinci:ft-personal-2022-08-08-02-28-29
-        self.answer = openai.Completion.create(\
-            model=self.model,\
-            prompt=f"Answer to this issue:\n\n{json.dumps(issue['body'])}",\
-            temperature=0, max_tokens=500\
+        self.answer = openai.Completion.create(
+            model=self.model,
+            prompt=f'Answer to this:\n\n{json.dumps(issue["body"])}',
+            temperature=0, max_tokens=500,
+            stop='<END>'
         )['choices'][0]['text']
 
     def do_help(self, args=''):
@@ -42,7 +42,7 @@ class GePeTTTo(cmd.Cmd):
     def do_clear(self, arg):
         '''Clear your prompt: CLEAR'''
         os.system('clear')
-    
+
     def do_add(self, arg):
         '''Start the analysis'''
         if arg.startswith('http'):
@@ -64,24 +64,23 @@ class GePeTTTo(cmd.Cmd):
         else:
             # Try to add the issue from a file
             with open(arg, 'r') as f:
-                content = 'Answer to this issue:\n\n' + f.read()
-                self.issues.append({'id': 0, \
-                                    'project_id': 0, \
-                                    'author': 'NONE', \
-                                    'body': f'{content}'})
+                self.issues.append({'id': 0,
+                                    'project_id': 0,
+                                    'author': 'NONE',
+                                    'body': f.read()})
                 print('Generating answer...')
                 self.do_next('')
 
-    
+
     def do_EOF(self, arg):
         return True
-    
+
     def do_start(self, arg):
         '''Start the analysis'''
         print('Retrieving issues... (can be slow)')
         self.issues = self.parser.get_last_issues()
         self.do_next(arg)
-    
+
     def do_next(self, arg):
         '''Show the next issue to analyze'''
         if self.answeringTo != None and self.answeringTo['id'] != 0:
@@ -95,7 +94,7 @@ class GePeTTTo(cmd.Cmd):
         self.print_issue(self.answeringTo, self.answer)
         self.issues = self.issues[1:]
         print(self.intro)
-    
+
     def do_send(self, arg):
         '''Send answer to GitLab'''
         if self.answeringTo['id'] == 0:
@@ -109,7 +108,7 @@ class GePeTTTo(cmd.Cmd):
         except:
             pass
         self.do_next('')
-    
+
     def do_save(self, arg):
         '''Save generated answer to a file'''
         filename = arg if arg != '' else f'{self.answeringTo["id"]}.answer'
@@ -134,7 +133,7 @@ Proposed answer from GePeTTTo:
         text += colored(answer, 'white')
         print(text)
 
- 
+
 if __name__ == "__main__":
     openai.api_key = os.getenv("OPENAI_API_KEY")
     gepettto = GePeTTTo()
