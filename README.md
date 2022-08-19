@@ -58,3 +58,11 @@ will run `src/answer-last.py` to gather last issues and answer it.
 
 Code in this directory is under BSD-3 License, rsc/custom.jsonl is mostly generated from the FAQ
 from docs.jami.net (under GNU Free Documentation License v1.3) or my own comments.
+
+## Demo
+
+![](img/demo.gif)
+
+![](img/first.png)
+
+![](img/second.png)
