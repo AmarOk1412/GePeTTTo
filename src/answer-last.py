@@ -24,7 +24,7 @@ class GePeTTTo(cmd.Cmd):
         '''Answer to an issue via GPT-3 model'''
         self.answer = openai.Completion.create(
             model=self.model,
-            prompt=f'Answer to this:\n\n{json.dumps(issue["body"])}',
+            prompt=f'Answer to this issue:\n\n{json.dumps(issue["body"])}',
             temperature=0, max_tokens=500,
             stop='<END>'
         )['choices'][0]['text']

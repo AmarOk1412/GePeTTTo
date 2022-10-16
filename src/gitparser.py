@@ -23,7 +23,7 @@ class GitParser:
     def mdToText(self, mdString):
         """ Converts a markdown string to plaintext """
         html = markdown(mdString)
-        text = ''.join(BeautifulSoup(html).findAll(text=True))
+        text = ''.join(BeautifulSoup(html, 'lxml').findAll(text=True))
         return text
 
 
@@ -119,10 +119,14 @@ class GitParser:
                 if p == 0:
                     firstIssue = data[0]['iid']
                 for obj in data:
+                    if obj['project_id'] == 30:
+                        continue
                     iid = obj['iid']
                     if lastIssue == str(iid):
                         return lastIssues
-                    content = obj["title"] + "\n\n" + obj["description"]
+                    title = obj['title'] if obj['title'] != None else ''
+                    description = obj['description'] if obj['description'] != None else ''
+                    content = title + "\n\n" + description
                     content = self.mdToText(content)
                     lastIssues.append({'id': iid, \
                                        'project': obj['project_id'], \
