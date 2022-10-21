@@ -24,7 +24,9 @@ GITLAB_ENDPOINT=YOUR_GITLAB_INSTANCE
 GITLAB_USERS=COMMA_SEPARATED_USERS # Optional, if you want to train a custom model, e.g. 9,3,233
 ```
 
-You also need to install `termcolor` (`pip3 install termcolor`), `bs4` (`pip3 install bs4`) and `markdown` (`pip3 install markdown`).
+You also need to install `termcolor` (`pip3 install termcolor`), `bs4` (`pip3 install bs4` and `pip install lxml`) and `markdown` (`pip3 install markdown`).
+
+Finally you will need OpenAI's library: `pip install openai`
 
 ## Usage
 
